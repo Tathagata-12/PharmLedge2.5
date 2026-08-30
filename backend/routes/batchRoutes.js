@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     createBatch,
+    getAllBatches,
     getBatchesByMedicine,
     updateBatch,
     deleteBatch
@@ -18,6 +19,13 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // ==========================================
+// GET ALL STOCK
+// GET /api/batches
+// ==========================================
+
+router.get("/", getAllBatches);
+
+// ==========================================
 // ADD NEW BATCH / STOCK
 // POST /api/batches
 // ==========================================
@@ -29,21 +37,30 @@ router.post("/", createBatch);
 // GET /api/batches/medicine/:medicineId
 // ==========================================
 
-router.get("/medicine/:medicineId", getBatchesByMedicine);
+router.get(
+    "/medicine/:medicineId",
+    getBatchesByMedicine
+);
 
 // ==========================================
 // UPDATE BATCH
 // PUT /api/batches/:id
 // ==========================================
 
-router.put("/:id", updateBatch);
+router.put(
+    "/:id",
+    updateBatch
+);
 
 // ==========================================
 // DELETE BATCH
 // DELETE /api/batches/:id
 // ==========================================
 
-router.delete("/:id", deleteBatch);
+router.delete(
+    "/:id",
+    deleteBatch
+);
 
 // ==========================================
 // EXPORT ROUTER
