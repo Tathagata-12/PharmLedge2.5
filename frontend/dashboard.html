@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>PharmLedge | Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
+```
+
+</head>
+
+<body class="app-page">
+
+```
+<!-- MOBILE OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-logo">
+        <div class="brand-icon">✚</div>
+        <span>Pharm<span>Ledge</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <p class="nav-label">MAIN</p>
+
+        <a href="dashboard.html" class="nav-item active">
+            <span class="nav-icon">⌂</span>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="medicines.html" class="nav-item">
+            <span class="nav-icon">💊</span>
+            <span>Medicines</span>
+        </a>
+
+        <a href="stock.html" class="nav-item">
+            <span class="nav-icon">📦</span>
+            <span>Stock</span>
+        </a>
+
+        <a href="vendors.html" class="nav-item">
+            <span class="nav-icon">🏢</span>
+            <span>Vendors</span>
+        </a>
+
+        <p class="nav-label">BUSINESS</p>
+
+        <a href="billing.html" class="nav-item">
+            <span class="nav-icon">🧾</span>
+            <span>Billing</span>
+        </a>
+
+        <a href="sales.html" class="nav-item">
+            <span class="nav-icon">📈</span>
+            <span>Sales History</span>
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <div class="sidebar-user">
+
+            <div class="user-avatar" id="userAvatar">
+                U
+            </div>
+
+            <div class="sidebar-user-info">
+                <strong id="sidebarUserName">
+                    User
+                </strong>
+
+                <span id="sidebarUserEmail">
+                    user@example.com
+                </span>
+            </div>
+
+        </div>
+
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            <span>↪</span>
+            Logout
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+
+        <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            aria-label="Open menu"
+        >
+            ☰
+        </button>
+
+        <div class="topbar-title">
+
+            <h1>Dashboard</h1>
+
+            <p id="currentDate">
+                Overview of your pharmacy
+            </p>
+
+        </div>
+
+        <div class="topbar-actions">
+
+            <div class="topbar-user">
+
+                <div
+                    class="user-avatar"
+                    id="topUserAvatar"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="topUserName">
+                        User
+                    </strong>
+
+                    <span>Pharmacy Admin</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- DASHBOARD CONTENT -->
+    <section class="dashboard-content">
+
+        <!-- WELCOME -->
+        <div class="welcome-card">
+
+            <div>
+                <p class="welcome-small">
+                    OVERVIEW
+                </p>
+
+                <h2>
+                    Welcome back,
+                    <span id="welcomeName">
+                        User
+                    </span> 👋
+                </h2>
+
+                <p>
+                    Here's what's happening with your
+                    pharmacy today.
+                </p>
+            </div>
+
+            <div class="welcome-decoration">
+                ✚
+            </div>
+
+        </div>
+
+
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+
+            <!-- MEDICINES -->
+            <div class="stat-card">
+
+                <div class="stat-card-top">
+
+                    <div class="stat-icon green">
+                        💊
+                    </div>
+
+                </div>
+
+                <p>Total Medicines</p>
+
+                <h3 id="totalMedicines">
+                    —
+                </h3>
+
+                <span class="stat-description">
+                    Medicines in catalog
+                </span>
+
+            </div>
+
+
+            <!-- STOCK -->
+            <div class="stat-card">
+
+                <div class="stat-card-top">
+
+                    <div class="stat-icon blue">
+                        📦
+                    </div>
+
+                </div>
+
+                <p>Live Stock</p>
+
+                <h3 id="totalStock">
+                    —
+                </h3>
+
+                <span class="stat-description">
+                    Available units
+                </span>
+
+            </div>
+
+
+            <!-- SALES -->
+            <div class="stat-card">
+
+                <div class="stat-card-top">
+
+                    <div class="stat-icon cyan">
+                        ₹
+                    </div>
+
+                </div>
+
+                <p>Today's Sales</p>
+
+                <h3>
+                    ₹<span id="todaySales">0</span>
+                </h3>
+
+                <span class="stat-description">
+                    Revenue generated today
+                </span>
+
+            </div>
+
+
+            <!-- BILLS -->
+            <div class="stat-card">
+
+                <div class="stat-card-top">
+
+                    <div class="stat-icon purple">
+                        🧾
+                    </div>
+
+                </div>
+
+                <p>Today's Bills</p>
+
+                <h3 id="todayBills">
+                    —
+                </h3>
+
+                <span class="stat-description">
+                    Transactions today
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- MIDDLE GRID -->
+        <div class="dashboard-grid">
+
+            <!-- LOW STOCK -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Low Stock</h3>
+
+                        <p>
+                            Medicines that need attention
+                        </p>
+                    </div>
+
+                    <a href="stock.html">
+                        View all
+                    </a>
+
+                </div>
+
+                <div
+                    class="alert-list"
+                    id="lowStockList"
+                >
+
+                    <div class="loading-state">
+                        Loading...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- EXPIRING -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Expiring Soon</h3>
+
+                        <p>
+                            Within the next 30 days
+                        </p>
+                    </div>
+
+                    <a href="stock.html">
+                        View all
+                    </a>
+
+                </div>
+
+                <div
+                    class="alert-list"
+                    id="expiryList"
+                >
+
+                    <div class="loading-state">
+                        Loading...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECENT SALES -->
+        <div class="dashboard-card sales-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3>Recent Sales</h3>
+
+                    <p>
+                        Your latest billing activity
+                    </p>
+                </div>
+
+                <a href="sales.html">
+                    View all
+                </a>
+
+            </div>
+
+            <div class="table-container">
+
+                <table class="data-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Bill ID</th>
+                            <th>Customer</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recentSalesTable">
+
+                        <tr>
+                            <td
+                                colspan="5"
+                                class="loading-state"
+                            >
+                                Loading...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- API -->
+<script src="js/api.js"></script>
+
+<!-- AUTH -->
+<script src="js/auth.js"></script>
+<script src="js/dashboard.js"></script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>PharmLedge | Stock</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
+```
+
+</head>
+
+<body class="app-page">
+
+```
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-logo">
+        <div class="brand-icon">✚</div>
+
+        <span>
+            Pharm<span>Ledge</span>
+        </span>
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <p class="nav-label">MAIN</p>
+
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">⌂</span>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="medicines.html" class="nav-item">
+            <span class="nav-icon">💊</span>
+            <span>Medicines</span>
+        </a>
+
+        <a href="stock.html" class="nav-item active">
+            <span class="nav-icon">📦</span>
+            <span>Stock</span>
+        </a>
+
+        <a href="vendors.html" class="nav-item">
+            <span class="nav-icon">🏢</span>
+            <span>Vendors</span>
+        </a>
+
+        <p class="nav-label">BUSINESS</p>
+
+        <a href="billing.html" class="nav-item">
+            <span class="nav-icon">🧾</span>
+            <span>Billing</span>
+        </a>
+
+        <a href="sales.html" class="nav-item">
+            <span class="nav-icon">📈</span>
+            <span>Sales History</span>
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <div class="sidebar-user">
+
+            <div class="user-avatar" id="userAvatar">
+                U
+            </div>
+
+            <div class="sidebar-user-info">
+
+                <strong id="sidebarUserName">
+                    User
+                </strong>
+
+                <span id="sidebarUserEmail">
+                    user@example.com
+                </span>
+
+            </div>
+
+        </div>
+
+        <button class="logout-btn" onclick="logout()">
+            <span>↪</span>
+            Logout
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+        <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            type="button"
+        >
+            ☰
+        </button>
+
+        <div class="topbar-title">
+
+            <h1>Stock</h1>
+
+            <p>
+                Manage medicine batches and inventory
+            </p>
+
+        </div>
+
+        <div class="topbar-actions">
+
+            <div class="topbar-user">
+
+                <div class="user-avatar" id="topUserAvatar">
+                    U
+                </div>
+
+                <div>
+
+                    <strong id="topUserName">
+                        User
+                    </strong>
+
+                    <span>
+                        Pharmacy Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENT -->
+    <section class="dashboard-content">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+
+            <div>
+
+                <h2>
+                    Stock Management
+                </h2>
+
+                <p>
+                    Manage batches, quantities and expiry dates.
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-primary"
+                id="addBatchBtn"
+                type="button"
+            >
+                + Add Batch
+            </button>
+
+        </div>
+
+
+        <!-- TOOLBAR -->
+        <div class="toolbar-card">
+
+            <div class="search-box">
+
+                <span>⌕</span>
+
+                <input
+                    type="search"
+                    id="stockSearchInput"
+                    placeholder="Search medicine or batch number..."
+                >
+
+            </div>
+
+            <select id="stockStatusFilter">
+
+                <option value="">
+                    All Stock
+                </option>
+
+                <option value="in-stock">
+                    In Stock
+                </option>
+
+                <option value="low-stock">
+                    Low Stock
+                </option>
+
+                <option value="out-of-stock">
+                    Out of Stock
+                </option>
+
+                <option value="expired">
+                    Expired
+                </option>
+
+                <option value="expiring">
+                    Expiring Soon
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- MESSAGE -->
+        <div
+            id="stockMessage"
+            class="auth-message hidden"
+        ></div>
+
+
+        <!-- STOCK TABLE -->
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+                        Medicine Batches
+                    </h3>
+
+                    <p id="batchCount">
+                        Loading batches...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table class="data-table medicine-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Medicine
+                            </th>
+
+                            <th>
+                                Batch Number
+                            </th>
+
+                            <th>
+                                Quantity
+                            </th>
+
+                            <th>
+                                Purchase Price
+                            </th>
+
+                            <th>
+                                Selling Price
+                            </th>
+
+                            <th>
+                                Expiry Date
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="stockTableBody">
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="loading-state"
+                            >
+                                Loading stock...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ADD / EDIT BATCH MODAL -->
+<div
+    class="modal-overlay"
+    id="batchModal"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="batchModalTitle">
+                    Add Stock Batch
+                </h2>
+
+                <p>
+                    Enter batch and inventory information
+                </p>
+
+            </div>
+
+            <button
+                class="modal-close"
+                id="closeBatchModalBtn"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- BATCH FORM -->
+        <form id="batchForm">
+
+            <input
+                type="hidden"
+                id="batchId"
+            >
+
+
+            <div class="form-grid">
+
+                <!-- MEDICINE -->
+                <div class="form-group">
+
+                    <label for="batchMedicine">
+                        Medicine *
+                    </label>
+
+                    <select
+                        id="batchMedicine"
+                        required
+                    >
+
+                        <option value="">
+                            Select medicine
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BATCH NUMBER -->
+                <div class="form-group">
+
+                    <label for="batchNumber">
+                        Batch Number *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="batchNumber"
+                        placeholder="e.g. PCM-002"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- QUANTITY -->
+                <div class="form-group">
+
+                    <label for="batchQuantity">
+                        Quantity *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="batchQuantity"
+                        min="0"
+                        value="0"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PURCHASE PRICE -->
+                <div class="form-group">
+
+                    <label for="batchPurchasePrice">
+                        Purchase Price *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="batchPurchasePrice"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- SELLING PRICE -->
+                <div class="form-group">
+
+                    <label for="batchSellingPrice">
+                        Selling Price *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="batchSellingPrice"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- MANUFACTURING DATE -->
+                <div class="form-group">
+
+                    <label for="manufacturingDate">
+                        Manufacturing Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="manufacturingDate"
+                    >
+
+                </div>
+
+
+                <!-- EXPIRY DATE -->
+                <div class="form-group">
+
+                    <label for="expiryDate">
+                        Expiry Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="expiryDate"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL FOOTER -->
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelBatchModalBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="saveBatchBtn"
+                >
+                    Save Batch
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/stock.js"></script>
+```
+
+</body>
+
+</html>

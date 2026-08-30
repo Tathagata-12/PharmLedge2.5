@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PharmLedge | Login</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <!-- LEFT BRAND SECTION -->
+        <section class="auth-brand">
+
+            <div class="brand-logo">
+                <div class="brand-icon">✚</div>
+                <span>Pharm<span>Ledge</span></span>
+            </div>
+
+            <div class="brand-content">
+
+                <p class="eyebrow">
+                    SMART PHARMACY MANAGEMENT
+                </p>
+
+                <h1>
+                    Manage your pharmacy.
+                    <span>Smarter.</span>
+                </h1>
+
+                <p>
+                    Manage medicines, inventory, billing,
+                    vendors and sales from one simple platform.
+                </p>
+
+            </div>
+
+            <div class="brand-features">
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Real-time inventory</span>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Automated billing</span>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Secure user accounts</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LOGIN SECTION -->
+        <section class="auth-form-section">
+
+            <div class="auth-card">
+
+                <div class="mobile-logo">
+                    <div class="brand-icon">✚</div>
+                    <span>Pharm<span>Ledge</span></span>
+                </div>
+
+                <div class="form-heading">
+
+                    <h2>Welcome back</h2>
+
+                    <p>
+                        Sign in to your PharmLedge account
+                    </p>
+
+                </div>
+
+
+                <!-- ERROR / SUCCESS MESSAGE -->
+                <div
+                    id="authMessage"
+                    class="auth-message hidden"
+                ></div>
+
+
+                <form id="loginForm">
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PASSWORD -->
+                    <div class="form-group">
+
+                        <div class="label-row">
+
+                            <label for="password">
+                                Password
+                            </label>
+
+                        </div>
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-full"
+                        id="loginButton"
+                    >
+                        Sign in
+                    </button>
+
+                </form>
+
+
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+
+                <p class="auth-switch">
+
+                    Don't have an account?
+
+                    <a href="register.html">
+                        Create account
+                    </a>
+
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- API + AUTH -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+
+    <script>
+
+        // If already logged in, go to dashboard
+        redirectIfLoggedIn();
+
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const authMessage =
+            document.getElementById("authMessage");
+
+
+        function showMessage(message, type) {
+
+            authMessage.textContent = message;
+
+            authMessage.className =
+                `auth-message ${type}`;
+
+        }
+
+
+        loginForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                if (!email || !password) {
+
+                    showMessage(
+                        "Please enter your email and password.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                loginButton.disabled = true;
+
+                loginButton.textContent =
+                    "Signing in...";
+
+
+                try {
+
+                    const response =
+                        await login(
+                            email,
+                            password
+                        );
+
+
+                    /*
+                     * Our backend returns the JWT
+                     * and user information.
+                     */
+                    saveAuth(
+                        response.token,
+                        response.user || null
+                    );
+
+
+                    showMessage(
+                        "Login successful. Redirecting...",
+                        "success"
+                    );
+
+
+                    setTimeout(() => {
+
+                        window.location.href =
+                            "dashboard.html";
+
+                    }, 500);
+
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message ||
+                        "Invalid email or password.",
+                        "error"
+                    );
+
+                    loginButton.disabled = false;
+
+                    loginButton.textContent =
+                        "Sign in";
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

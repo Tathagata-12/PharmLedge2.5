@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PharmLedge | Create Account</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <!-- BRAND SECTION -->
+        <section class="auth-brand">
+
+            <div class="brand-logo">
+                <div class="brand-icon">✚</div>
+                <span>Pharm<span>Ledge</span></span>
+            </div>
+
+            <div class="brand-content">
+
+                <p class="eyebrow">
+                    SMART PHARMACY MANAGEMENT
+                </p>
+
+                <h1>
+                    Your pharmacy.
+                    <span>Your control.</span>
+                </h1>
+
+                <p>
+                    Create your account and manage your
+                    pharmacy operations from one intelligent
+                    platform.
+                </p>
+
+            </div>
+
+            <div class="brand-features">
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Personalized inventory</span>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Smart billing</span>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Secure data</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- REGISTER SECTION -->
+        <section class="auth-form-section">
+
+            <div class="auth-card">
+
+                <div class="mobile-logo">
+                    <div class="brand-icon">✚</div>
+                    <span>Pharm<span>Ledge</span></span>
+                </div>
+
+
+                <div class="form-heading">
+
+                    <h2>Create your account</h2>
+
+                    <p>
+                        Get started with PharmLedge
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="authMessage"
+                    class="auth-message hidden"
+                ></div>
+
+
+                <form id="registerForm">
+
+                    <!-- NAME -->
+                    <div class="form-group">
+
+                        <label for="name">
+                            Full name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            placeholder="Enter your name"
+                            autocomplete="name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PASSWORD -->
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            minlength="6"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- CONFIRM PASSWORD -->
+                    <div class="form-group">
+
+                        <label for="confirmPassword">
+                            Confirm password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Repeat your password"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-full"
+                        id="registerButton"
+                    >
+                        Create account
+                    </button>
+
+                </form>
+
+
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+
+                <p class="auth-switch">
+
+                    Already have an account?
+
+                    <a href="login.html">
+                        Sign in
+                    </a>
+
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+
+    <script>
+
+        redirectIfLoggedIn();
+
+
+        const registerForm =
+            document.getElementById("registerForm");
+
+        const registerButton =
+            document.getElementById("registerButton");
+
+        const authMessage =
+            document.getElementById("authMessage");
+
+
+        function showMessage(message, type) {
+
+            authMessage.textContent = message;
+
+            authMessage.className =
+                `auth-message ${type}`;
+
+        }
+
+
+        registerForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const name =
+                    document
+                        .getElementById("name")
+                        .value
+                        .trim();
+
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+                const confirmPassword =
+                    document
+                        .getElementById("confirmPassword")
+                        .value;
+
+
+                // ------------------------------
+                // VALIDATION
+                // ------------------------------
+
+                if (!name || !email || !password) {
+
+                    showMessage(
+                        "Please fill in all required fields.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                if (password !== confirmPassword) {
+
+                    showMessage(
+                        "Passwords do not match.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                if (password.length < 6) {
+
+                    showMessage(
+                        "Password must be at least 6 characters.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                registerButton.disabled = true;
+
+                registerButton.textContent =
+                    "Creating account...";
+
+
+                try {
+
+                    const response =
+                        await register(
+                            name,
+                            email,
+                            password
+                        );
+
+
+                    /*
+                     * Some backends return a token
+                     * immediately after registration.
+                     *
+                     * If yours does, save it.
+                     */
+                    if (response.token) {
+
+                        saveAuth(
+                            response.token,
+                            response.user || null
+                        );
+
+                        showMessage(
+                            "Account created successfully!",
+                            "success"
+                        );
+
+                        setTimeout(() => {
+
+                            window.location.href =
+                                "dashboard.html";
+
+                        }, 600);
+
+                    } else {
+
+                        showMessage(
+                            "Account created successfully. Please sign in.",
+                            "success"
+                        );
+
+                        setTimeout(() => {
+
+                            window.location.href =
+                                "login.html";
+
+                        }, 800);
+
+                    }
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message ||
+                        "Unable to create account.",
+                        "error"
+                    );
+
+                    registerButton.disabled = false;
+
+                    registerButton.textContent =
+                        "Create account";
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PharmLedge | Sales History</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="app-page">
+
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="brand-icon">✚</div>
+
+            <span>
+                Pharm<span>Ledge</span>
+            </span>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <p class="nav-label">MAIN</p>
+
+            <a href="dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="medicines.html" class="nav-item">
+                <span class="nav-icon">💊</span>
+                <span>Medicines</span>
+            </a>
+
+            <a href="stock.html" class="nav-item">
+                <span class="nav-icon">📦</span>
+                <span>Stock</span>
+            </a>
+
+            <a href="vendors.html" class="nav-item">
+                <span class="nav-icon">🏢</span>
+                <span>Vendors</span>
+            </a>
+
+            <p class="nav-label">BUSINESS</p>
+
+            <a href="billing.html" class="nav-item">
+                <span class="nav-icon">🧾</span>
+                <span>Billing</span>
+            </a>
+
+            <a href="sales.html" class="nav-item active">
+                <span class="nav-icon">📈</span>
+                <span>Sales History</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div class="user-avatar" id="userAvatar">
+                    U
+                </div>
+
+                <div class="sidebar-user-info">
+
+                    <strong id="sidebarUserName">
+                        User
+                    </strong>
+
+                    <span id="sidebarUserEmail">
+                        user@example.com
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button class="logout-btn" onclick="logout()">
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button"
+            >
+                ☰
+            </button>
+
+            <div class="topbar-title">
+
+                <h1>Sales History</h1>
+
+                <p>
+                    View and manage completed sales
+                </p>
+
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="topbar-user">
+
+                    <div
+                        class="user-avatar"
+                        id="topUserAvatar"
+                    >
+                        U
+                    </div>
+
+                    <div>
+
+                        <strong id="topUserName">
+                            User
+                        </strong>
+
+                        <span>
+                            Pharmacy Admin
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- CONTENT -->
+        <section class="dashboard-content">
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+
+                <div>
+
+                    <h2>
+                        Sales History
+                    </h2>
+
+                    <p>
+                        Track your completed bills and transactions.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- TOOLBAR -->
+            <div class="toolbar-card">
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="Search customer or bill..."
+                    >
+
+                </div>
+
+                <select id="paymentFilter">
+
+                    <option value="">
+                        All Payments
+                    </option>
+
+                    <option value="Cash">
+                        Cash
+                    </option>
+
+                    <option value="UPI">
+                        UPI
+                    </option>
+
+                    <option value="Card">
+                        Card
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- MESSAGE -->
+            <div
+                id="pageMessage"
+                class="auth-message hidden"
+            ></div>
+
+            <!-- SALES TABLE -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Completed Sales
+                        </h3>
+
+                        <p id="salesCount">
+                            Loading sales...
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="table-container">
+
+                    <table class="data-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Bill ID
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Items
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Payment
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="salesTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="loading-state"
+                                >
+                                    Loading sales...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- SALE DETAILS MODAL -->
+    <div
+        class="modal-overlay"
+        id="saleModal"
+    >
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        Sale Details
+                    </h2>
+
+                    <p>
+                        Complete transaction information
+                    </p>
+
+                </div>
+
+                <button
+                    class="modal-close"
+                    id="closeSaleModal"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div id="saleDetails"></div>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sales.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PharmLedge | Billing</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- PRINT STYLES -->
+    <style>
+        @media print {
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #printableBill,
+            #printableBill * {
+                visibility: visible !important;
+            }
+
+            #printableBill {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+                color: black !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .bill-print-area {
+                padding: 25px !important;
+                color: black !important;
+                background: white !important;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body class="app-page">
+
+    <!-- ==========================================
+         MOBILE OVERLAY
+    ========================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- ==========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="brand-icon">
+                ✚
+            </div>
+
+            <span>
+                Pharm<span>Ledge</span>
+            </span>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="nav-label">
+                MAIN
+            </p>
+
+            <a
+                href="dashboard.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a
+                href="medicines.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    💊
+                </span>
+
+                <span>
+                    Medicines
+                </span>
+
+            </a>
+
+
+            <a
+                href="stock.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    📦
+                </span>
+
+                <span>
+                    Stock
+                </span>
+
+            </a>
+
+
+            <a
+                href="vendors.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    🏢
+                </span>
+
+                <span>
+                    Vendors
+                </span>
+
+            </a>
+
+
+            <p class="nav-label">
+                BUSINESS
+            </p>
+
+
+            <a
+                href="billing.html"
+                class="nav-item active">
+
+                <span class="nav-icon">
+                    🧾
+                </span>
+
+                <span>
+                    Billing
+                </span>
+
+            </a>
+
+
+            <a
+                href="sales.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    📈
+                </span>
+
+                <span>
+                    Sales History
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- SIDEBAR USER -->
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div
+                    class="user-avatar"
+                    id="userAvatar">
+
+                    U
+
+                </div>
+
+
+                <div class="sidebar-user-info">
+
+                    <strong id="sidebarUserName">
+                        User
+                    </strong>
+
+                    <span id="sidebarUserEmail">
+                        user@example.com
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="logout-btn"
+                type="button"
+                onclick="logout()">
+
+                <span>
+                    ↪
+                </span>
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ==========================================
+         MAIN CONTENT
+    ========================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>
+                    Billing
+                </h1>
+
+                <p>
+                    Create and complete customer bills
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <div class="topbar-user">
+
+                    <div
+                        class="user-avatar"
+                        id="topUserAvatar">
+
+                        U
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="topUserName">
+                            User
+                        </strong>
+
+                        <span>
+                            Pharmacy Admin
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ==========================================
+             BILLING CONTENT
+        ========================================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="billingMessage"
+                class="auth-message hidden">
+            </div>
+
+
+
+            <!-- ======================================
+                 BILLING LAYOUT
+            ====================================== -->
+
+            <div class="billing-layout">
+
+
+                <!-- ==================================
+                     ADD MEDICINES
+                ================================== -->
+
+                <div
+                    class="dashboard-card billing-products-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Add Medicines
+                            </h3>
+
+                            <p>
+                                Select medicine and batch
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="billing-form">
+
+
+                        <!-- MEDICINE -->
+
+                        <div class="form-group">
+
+                            <label for="billingMedicine">
+                                Medicine
+                            </label>
+
+                            <select id="billingMedicine">
+
+                                <option value="">
+                                    Select medicine
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- BATCH -->
+
+                        <div class="form-group">
+
+                            <label for="billingBatch">
+                                Batch
+                            </label>
+
+                            <select
+                                id="billingBatch"
+                                disabled>
+
+                                <option value="">
+                                    Select batch
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- QUANTITY -->
+
+                        <div class="form-group">
+
+                            <label for="billingQuantity">
+                                Quantity
+                            </label>
+
+                            <input
+                                type="number"
+                                id="billingQuantity"
+                                min="1"
+                                value="1">
+
+                        </div>
+
+
+
+                        <!-- ADD BUTTON -->
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="addToBillBtn">
+
+                            + Add To Bill
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================
+                     CURRENT BILL
+                ================================== -->
+
+                <div
+                    class="dashboard-card billing-cart-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Current Bill
+                            </h3>
+
+                            <p id="cartCount">
+                                0 items
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table class="data-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Medicine
+                                    </th>
+
+                                    <th>
+                                        Batch
+                                    </th>
+
+                                    <th>
+                                        Qty
+                                    </th>
+
+                                    <th>
+                                        Price
+                                    </th>
+
+                                    <th>
+                                        Total
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="billTableBody">
+
+                                <tr>
+
+                                    <td
+                                        colspan="6"
+                                        class="empty-table">
+
+                                        No medicines added yet.
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================
+                     CUSTOMER DETAILS
+                ================================== -->
+
+                <div
+                    class="dashboard-card billing-customer-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Customer Details
+                            </h3>
+
+                            <p>
+                                Optional customer information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="billing-customer-form">
+
+
+                        <!-- CUSTOMER NAME -->
+
+                        <div class="form-group">
+
+                            <label for="customerName">
+                                Customer Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="customerName"
+                                placeholder="Customer name">
+
+                        </div>
+
+
+
+                        <!-- CUSTOMER PHONE -->
+
+                        <div class="form-group">
+
+                            <label for="customerPhone">
+                                Phone
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="customerPhone"
+                                placeholder="Phone number">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================
+                     PAYMENT SUMMARY
+                ================================== -->
+
+                <div
+                    class="dashboard-card billing-summary-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Payment
+                            </h3>
+
+                            <p>
+                                Review and complete sale
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="billing-summary">
+
+
+                        <!-- SUBTOTAL -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <strong id="subtotal">
+                                ₹0.00
+                            </strong>
+
+                        </div>
+
+
+
+                        <!-- DISCOUNT -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Discount
+                            </span>
+
+                            <input
+                                type="number"
+                                id="discount"
+                                min="0"
+                                value="0">
+
+                        </div>
+
+
+
+                        <!-- TAX -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Tax
+                            </span>
+
+                            <input
+                                type="number"
+                                id="tax"
+                                min="0"
+                                value="0">
+
+                        </div>
+
+
+
+                        <!-- TOTAL -->
+
+                        <div class="summary-total">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <strong id="totalAmount">
+                                ₹0.00
+                            </strong>
+
+                        </div>
+
+
+
+                        <!-- PAYMENT METHOD -->
+
+                        <div class="form-group">
+
+                            <label for="paymentMethod">
+                                Payment Method
+                            </label>
+
+                            <select id="paymentMethod">
+
+                                <option value="Cash">
+                                    Cash
+                                </option>
+
+                                <option value="UPI">
+                                    UPI
+                                </option>
+
+                                <option value="Card">
+                                    Card
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- COMPLETE SALE -->
+
+                        <button
+                            type="button"
+                            class="btn btn-primary billing-complete-btn"
+                            id="completeSaleBtn">
+
+                            Complete Sale
+
+                        </button>
+
+
+
+                        <!-- CLEAR BILL -->
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="clearBillBtn">
+
+                            Clear Bill
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ==========================================
+         PRINTABLE BILL MODAL
+    ========================================== -->
+
+    <div
+        class="modal-overlay"
+        id="billModal">
+
+
+        <div
+            class="modal-card"
+            id="printableBill">
+
+
+            <!-- BILL HEADER -->
+
+            <div
+                class="modal-header"
+                style="border-bottom: 1px solid #ddd;">
+
+                <div>
+
+                    <h2>
+                        PharmLedge
+                    </h2>
+
+                    <p>
+                        Pharmacy Invoice
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="modal-close no-print"
+                    id="closeBillModal"
+                    type="button">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- ==================================
+                 PRINTABLE BILL CONTENT
+            ================================== -->
+
+            <div
+                id="billContent"
+                class="bill-print-area">
+
+                <!-- billing.js can generate the invoice here -->
+
+            </div>
+
+
+
+            <!-- ==================================
+                 BILL ACTIONS
+            ================================== -->
+
+            <div
+                class="modal-footer no-print"
+                style="padding: 20px;">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="closeBillBtn">
+
+                    Close
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="printBillBtn">
+
+                    🖨 Print / Save PDF
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         JAVASCRIPT
+    ========================================== -->
+
+    <script src="js/api.js"></script>
+
+    <script src="js/auth.js"></script>
+
+    <script src="js/billing.js"></script>
+
+
+</body>
+
+</html>

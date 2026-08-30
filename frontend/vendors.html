@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PharmLedge | Vendors</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="app-page">
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR OVERLAY -->
+    <!-- ========================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR -->
+    <!-- ========================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="brand-icon">
+                ✚
+            </div>
+
+            <span>
+                Pharm<span>Ledge</span>
+            </span>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="nav-label">
+                MAIN
+            </p>
+
+            <a
+                href="dashboard.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a
+                href="medicines.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    💊
+                </span>
+
+                <span>
+                    Medicines
+                </span>
+
+            </a>
+
+
+            <a
+                href="stock.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    📦
+                </span>
+
+                <span>
+                    Stock
+                </span>
+
+            </a>
+
+
+            <a
+                href="vendors.html"
+                class="nav-item active">
+
+                <span class="nav-icon">
+                    🏢
+                </span>
+
+                <span>
+                    Vendors
+                </span>
+
+            </a>
+
+
+            <p class="nav-label">
+                BUSINESS
+            </p>
+
+
+            <a
+                href="billing.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    🧾
+                </span>
+
+                <span>
+                    Billing
+                </span>
+
+            </a>
+
+
+            <a
+                href="sales.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    📈
+                </span>
+
+                <span>
+                    Sales History
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- SIDEBAR USER -->
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div
+                    class="user-avatar"
+                    id="userAvatar">
+
+                    U
+
+                </div>
+
+
+                <div class="sidebar-user-info">
+
+                    <strong id="sidebarUserName">
+                        User
+                    </strong>
+
+                    <span id="sidebarUserEmail">
+                        user@example.com
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="logout-btn"
+                type="button"
+                onclick="logout()">
+
+                <span>
+                    ↪
+                </span>
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ========================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>
+                    Vendors
+                </h1>
+
+                <p>
+                    Manage your medicine suppliers
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <div class="topbar-user">
+
+                    <div
+                        class="user-avatar"
+                        id="topUserAvatar">
+
+                        U
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="topUserName">
+                            User
+                        </strong>
+
+                        <span>
+                            Pharmacy Admin
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ========================================== -->
+        <!-- CONTENT -->
+        <!-- ========================================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div>
+
+                    <h2>
+                        Vendor Directory
+                    </h2>
+
+                    <p>
+                        Add, edit and manage your medicine suppliers.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="addVendorBtn">
+
+                    + Add Vendor
+
+                </button>
+
+            </div>
+
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="vendorMessage"
+                class="auth-message hidden">
+            </div>
+
+
+
+            <!-- SEARCH -->
+
+            <div class="toolbar-card">
+
+                <div class="search-box">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input
+                        type="search"
+                        id="vendorSearchInput"
+                        placeholder="Search vendors...">
+
+                </div>
+
+            </div>
+
+
+
+            <!-- VENDOR TABLE -->
+
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            All Vendors
+                        </h3>
+
+                        <p id="vendorCount">
+                            Loading vendors...
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table class="data-table vendor-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Vendor
+                                </th>
+
+                                <th>
+                                    Contact
+                                </th>
+
+                                <th>
+                                    Email
+                                </th>
+
+                                <th>
+                                    Address
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="vendorTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="loading-state">
+
+                                    Loading vendors...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ========================================== -->
+    <!-- ADD / EDIT VENDOR MODAL -->
+    <!-- ========================================== -->
+
+    <div
+        class="modal-overlay"
+        id="vendorModal">
+
+        <div class="modal-card">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="vendorModalTitle">
+                        Add Vendor
+                    </h2>
+
+                    <p>
+                        Enter vendor information
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closeVendorModalBtn">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- FORM -->
+
+            <form id="vendorForm">
+
+                <!-- Hidden ID for edit -->
+
+                <input
+                    type="hidden"
+                    id="vendorId">
+
+
+                <div class="form-grid">
+
+
+                    <!-- VENDOR NAME -->
+
+                    <div class="form-group">
+
+                        <label for="vendorName">
+                            Vendor Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="vendorName"
+                            placeholder="e.g. ABC Pharma"
+                            required>
+
+                    </div>
+
+
+
+                    <!-- CONTACT -->
+
+                    <div class="form-group">
+
+                        <label for="vendorContact">
+                            Contact
+                        </label>
+
+                        <input
+                            type="text"
+                            id="vendorContact"
+                            placeholder="e.g. 9876543210">
+
+                    </div>
+
+
+
+                    <!-- EMAIL -->
+
+                    <div class="form-group">
+
+                        <label for="vendorEmail">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="vendorEmail"
+                            placeholder="e.g. supplier@example.com">
+
+                    </div>
+
+
+
+                    <!-- ADDRESS -->
+
+                    <div class="form-group form-group-full">
+
+                        <label for="vendorAddress">
+                            Address
+                        </label>
+
+                        <textarea
+                            id="vendorAddress"
+                            rows="4"
+                            placeholder="Vendor address..."></textarea>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- MODAL FOOTER -->
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelVendorModalBtn">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="saveVendorBtn">
+
+                        Save Vendor
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================== -->
+
+    <script src="js/api.js"></script>
+
+    <script src="js/auth.js"></script>
+
+    <script src="js/vendors.js"></script>
+
+</body>
+
+</html>
