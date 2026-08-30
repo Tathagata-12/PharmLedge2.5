@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://pharmledge2-5.onrender.com/api";
+const API_BASE_URL = "https://pharmledge2-5.onrender.com";
 // ==========================================
 // AUTH TOKEN
 // ==========================================
