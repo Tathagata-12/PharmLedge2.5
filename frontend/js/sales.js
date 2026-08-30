@@ -1,11 +1,18 @@
 requireAuth();
 
 // ==========================================
+// API BASE URL
+// ==========================================
+
+const API_BASE_URL = "https://pharmledge2-5.onrender.com/api";
+
+// ==========================================
 // DOM ELEMENTS
 // ==========================================
 
 const salesTableBody = document.getElementById("salesTableBody");
 const salesCount = document.getElementById("salesCount");
+
 const searchInput = document.getElementById("searchInput");
 const paymentFilter = document.getElementById("paymentFilter");
 
@@ -83,8 +90,12 @@ async function loadSales() {
 
         const token = localStorage.getItem("token");
 
+        if (!token) {
+            throw new Error("Authentication token not found");
+        }
+
         const response = await fetch(
-            "http://localhost:5050/api/sales",
+            `${API_BASE_URL}/sales`,
             {
                 method: "GET",
                 headers: {
@@ -102,10 +113,16 @@ async function loadSales() {
             );
         }
 
-        if (Array.isArray(data)) {
-            sales = data;
-        } else if (Array.isArray(data.sales)) {
+        // Backend returns:
+        // {
+        //     count: number,
+        //     sales: [...]
+        // }
+
+        if (Array.isArray(data.sales)) {
             sales = data.sales;
+        } else if (Array.isArray(data)) {
+            sales = data;
         } else {
             sales = [];
         }
@@ -118,7 +135,19 @@ async function loadSales() {
         salesTableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-table">
-                    Unable to load sales.
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            ⚠️
+                        </div>
+
+                        <strong>
+                            Unable to load sales
+                        </strong>
+
+                        <span>
+                            Please refresh the page and try again.
+                        </span>
+                    </div>
                 </td>
             </tr>
         `;
@@ -132,13 +161,16 @@ async function loadSales() {
 // ==========================================
 
 function getFilteredSales() {
-    const search = searchInput.value
-        .trim()
-        .toLowerCase();
+    const search = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
 
-    const payment = paymentFilter.value;
+    const payment = paymentFilter
+        ? paymentFilter.value
+        : "";
 
     return sales.filter(function (sale) {
+
         const customer = String(
             sale.customer_name || ""
         ).toLowerCase();
@@ -147,21 +179,20 @@ function getFilteredSales() {
             sale.id ||
             sale.sale_id ||
             ""
-        );
+        ).toLowerCase();
 
         const salePayment = String(
             sale.payment_method || ""
-        );
+        ).toLowerCase();
 
         const matchesSearch =
             !search ||
             customer.includes(search) ||
-            saleId.toLowerCase().includes(search);
+            saleId.includes(search);
 
         const matchesPayment =
             !payment ||
-            salePayment.toLowerCase() ===
-            payment.toLowerCase();
+            salePayment === payment.toLowerCase();
 
         return matchesSearch && matchesPayment;
     });
@@ -182,6 +213,7 @@ function renderSales() {
         salesTableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-table">
+
                     <div class="empty-state">
 
                         <div class="empty-icon">
@@ -197,6 +229,7 @@ function renderSales() {
                         </span>
 
                     </div>
+
                 </td>
             </tr>
         `;
@@ -233,9 +266,7 @@ function renderSales() {
             const items =
                 sale.items_count ??
                 sale.item_count ??
-                (Array.isArray(sale.items)
-                    ? sale.items.length
-                    : "-");
+                "-";
 
             return `
                 <tr>
@@ -271,14 +302,16 @@ function renderSales() {
                     </td>
 
                     <td>
+
                         <button
                             type="button"
                             class="table-action edit"
                             onclick="viewSale(${Number(id)})"
-                            title="View"
+                            title="View Bill"
                         >
                             👁
                         </button>
+
                     </td>
 
                 </tr>
@@ -288,301 +321,511 @@ function renderSales() {
 }
 
 // ==========================================
-// VIEW SALE
+// VIEW SALE / BILL
 // ==========================================
 
 window.viewSale = async function (id) {
 
-    const sale = sales.find(function (item) {
+    try {
 
-        return Number(
-            item.id ||
-            item.sale_id
-        ) === Number(id);
+        const token = localStorage.getItem("token");
 
-    });
+        if (!token) {
+            throw new Error("Authentication token not found");
+        }
 
-    if (!sale) {
-        return;
-    }
+        // ==========================================
+        // SHOW LOADING MODAL
+        // ==========================================
 
-    const customer =
-        sale.customer_name ||
-        "Walk-in Customer";
+        saleDetails.innerHTML = `
+            <div style="padding:40px; text-align:center;">
+                <strong>
+                    Loading bill...
+                </strong>
+            </div>
+        `;
 
-    const phone =
-        sale.customer_phone ||
-        "Not provided";
+        saleModal.classList.add("show");
+        document.body.classList.add("modal-open");
 
-    const amount =
-        Number(
-            sale.total_amount || 0
+        // ==========================================
+        // FETCH COMPLETE BILL
+        // ==========================================
+
+        const response = await fetch(
+            `${API_BASE_URL}/sales/${Number(id)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            }
         );
 
-    const payment =
-        sale.payment_method ||
-        "Cash";
+        const data = await response.json();
 
-    const date =
-        formatDate(
-            sale.created_at
-        );
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load bill"
+            );
+        }
 
-    let itemsHTML = "";
+        const sale = data.sale;
+        const items = Array.isArray(data.items)
+            ? data.items
+            : [];
 
-    if (
-        Array.isArray(sale.items) &&
-        sale.items.length > 0
-    ) {
+        if (!sale) {
+            throw new Error("Bill information not found");
+        }
 
-        itemsHTML = sale.items
-            .map(function (item) {
+        // ==========================================
+        // BILL INFORMATION
+        // ==========================================
 
-                const quantity =
-                    Number(
-                        item.quantity || 0
-                    );
+        const customer =
+            sale.customer_name ||
+            "Walk-in Customer";
 
-                const unitPrice =
-                    Number(
-                        item.unit_price || 0
-                    );
+        const phone =
+            sale.customer_phone ||
+            "Not provided";
 
-                const total =
-                    Number(
-                        item.total_price ??
-                        quantity * unitPrice
-                    );
+        const amount =
+            Number(
+                sale.total_amount || 0
+            );
 
-                return `
+        const subtotal =
+            Number(
+                sale.subtotal || 0
+            );
+
+        const discount =
+            Number(
+                sale.discount || 0
+            );
+
+        const tax =
+            Number(
+                sale.tax || 0
+            );
+
+        const payment =
+            sale.payment_method ||
+            "Cash";
+
+        const date =
+            formatDate(
+                sale.created_at
+            );
+
+        const saleId =
+            sale.id ||
+            sale.sale_id ||
+            id;
+
+        // ==========================================
+        // BILL ITEMS
+        // ==========================================
+
+        let itemsHTML = "";
+
+        if (items.length > 0) {
+
+            itemsHTML = items
+                .map(function (item) {
+
+                    const quantity =
+                        Number(
+                            item.quantity || 0
+                        );
+
+                    const unitPrice =
+                        Number(
+                            item.unit_price || 0
+                        );
+
+                    const total =
+                        Number(
+                            item.total_price ??
+                            quantity * unitPrice
+                        );
+
+                    const medicineName =
+                        item.medicine_name ||
+                        "Medicine";
+
+                    const batchNumber =
+                        item.batch_number ||
+                        "";
+
+                    return `
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                gap:20px;
+                                padding:12px 0;
+                                border-bottom:1px solid var(--border);
+                            "
+                        >
+
+                            <div>
+
+                                <strong>
+                                    ${escapeHTML(
+                                        medicineName
+                                    )}
+                                </strong>
+
+                                <div
+                                    style="
+                                        font-size:11px;
+                                        color:var(--text-light);
+                                        margin-top:4px;
+                                    "
+                                >
+
+                                    Qty: ${quantity}
+
+                                    ${
+                                        batchNumber
+                                            ? ` | Batch: ${escapeHTML(batchNumber)}`
+                                            : ""
+                                    }
+
+                                    <br>
+
+                                    Unit Price:
+                                    ₹${formatCurrency(unitPrice)}
+
+                                </div>
+
+                            </div>
+
+                            <strong>
+                                ₹${formatCurrency(total)}
+                            </strong>
+
+                        </div>
+                    `;
+                })
+                .join("");
+
+        } else {
+
+            itemsHTML = `
+                <p style="color:var(--text-light);">
+                    No item details available.
+                </p>
+            `;
+        }
+
+        // ==========================================
+        // BILL HTML
+        // ==========================================
+
+        saleDetails.innerHTML = `
+            <div style="padding:25px;">
+
+                <!-- BILL HEADER -->
+
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(
+                            2,
+                            minmax(0, 1fr)
+                        );
+                        gap:18px;
+                        margin-bottom:25px;
+                    "
+                >
+
+                    <div>
+
+                        <span
+                            style="
+                                font-size:10px;
+                                color:var(--text-light);
+                            "
+                        >
+                            BILL ID
+                        </span>
+
+                        <strong
+                            style="
+                                display:block;
+                                margin-top:5px;
+                            "
+                        >
+                            #${escapeHTML(String(saleId))}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span
+                            style="
+                                font-size:10px;
+                                color:var(--text-light);
+                            "
+                        >
+                            DATE
+                        </span>
+
+                        <strong
+                            style="
+                                display:block;
+                                margin-top:5px;
+                            "
+                        >
+                            ${date}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span
+                            style="
+                                font-size:10px;
+                                color:var(--text-light);
+                            "
+                        >
+                            CUSTOMER
+                        </span>
+
+                        <strong
+                            style="
+                                display:block;
+                                margin-top:5px;
+                            "
+                        >
+                            ${escapeHTML(customer)}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span
+                            style="
+                                font-size:10px;
+                                color:var(--text-light);
+                            "
+                        >
+                            PHONE
+                        </span>
+
+                        <strong
+                            style="
+                                display:block;
+                                margin-top:5px;
+                            "
+                        >
+                            ${escapeHTML(phone)}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ITEMS -->
+
+                <h3
+                    style="
+                        margin-bottom:10px;
+                        font-size:14px;
+                    "
+                >
+                    Items
+                </h3>
+
+                <div>
+                    ${itemsHTML}
+                </div>
+
+
+                <!-- BILL SUMMARY -->
+
+                <div
+                    style="
+                        margin-top:22px;
+                        padding-top:18px;
+                        border-top:1px solid var(--border);
+                    "
+                >
+
                     <div
                         style="
                             display:flex;
                             justify-content:space-between;
-                            gap:20px;
-                            padding:12px 0;
-                            border-bottom:1px solid var(--border);
+                            margin-bottom:8px;
+                        "
+                    >
+
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <strong>
+                            ₹${formatCurrency(subtotal)}
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            margin-bottom:8px;
+                        "
+                    >
+
+                        <span>
+                            Discount
+                        </span>
+
+                        <strong>
+                            ₹${formatCurrency(discount)}
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            margin-bottom:12px;
+                        "
+                    >
+
+                        <span>
+                            Tax
+                        </span>
+
+                        <strong>
+                            ₹${formatCurrency(tax)}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- PAYMENT + TOTAL -->
+
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            padding-top:15px;
+                            border-top:1px solid var(--border);
                         "
                     >
 
                         <div>
 
-                            <strong>
-                                ${escapeHTML(
-                                    item.medicine_name ||
-                                    "Medicine"
-                                )}
-                            </strong>
-
-                            <div
+                            <span
                                 style="
-                                    font-size:11px;
+                                    display:block;
+                                    font-size:10px;
                                     color:var(--text-light);
-                                    margin-top:4px;
                                 "
                             >
-                                Qty: ${quantity}
-                            </div>
+                                PAYMENT
+                            </span>
+
+                            <strong>
+                                ${escapeHTML(payment)}
+                            </strong>
 
                         </div>
 
-                        <strong>
-                            ₹${formatCurrency(total)}
-                        </strong>
+
+                        <div style="text-align:right;">
+
+                            <span
+                                style="
+                                    display:block;
+                                    font-size:10px;
+                                    color:var(--text-light);
+                                "
+                            >
+                                TOTAL
+                            </span>
+
+                            <strong
+                                style="
+                                    font-size:20px;
+                                    color:var(--primary);
+                                "
+                            >
+                                ₹${formatCurrency(amount)}
+                            </strong>
+
+                        </div>
 
                     </div>
-                `;
-            })
-            .join("");
 
-    } else {
+                </div>
 
-        itemsHTML = `
-            <p style="color:var(--text-light);">
-                Item details not available.
-            </p>
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error(
+            "View bill error:",
+            error
+        );
+
+        saleDetails.innerHTML = `
+            <div
+                style="
+                    padding:40px;
+                    text-align:center;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:35px;
+                        margin-bottom:10px;
+                    "
+                >
+                    ⚠️
+                </div>
+
+                <strong>
+                    Unable to load bill
+                </strong>
+
+                <p
+                    style="
+                        color:var(--text-light);
+                        margin-top:8px;
+                    "
+                >
+                    ${escapeHTML(
+                        error.message ||
+                        "Something went wrong"
+                    )}
+                </p>
+
+            </div>
         `;
     }
-
-    const saleId =
-        sale.id ||
-        sale.sale_id ||
-        "";
-
-    saleDetails.innerHTML = `
-        <div style="padding:25px;">
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:repeat(2, minmax(0, 1fr));
-                    gap:18px;
-                    margin-bottom:25px;
-                "
-            >
-
-                <div>
-
-                    <span
-                        style="
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        BILL ID
-                    </span>
-
-                    <strong
-                        style="
-                            display:block;
-                            margin-top:5px;
-                        "
-                    >
-                        #${escapeHTML(String(saleId))}
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span
-                        style="
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        DATE
-                    </span>
-
-                    <strong
-                        style="
-                            display:block;
-                            margin-top:5px;
-                        "
-                    >
-                        ${date}
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span
-                        style="
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        CUSTOMER
-                    </span>
-
-                    <strong
-                        style="
-                            display:block;
-                            margin-top:5px;
-                        "
-                    >
-                        ${escapeHTML(customer)}
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span
-                        style="
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        PHONE
-                    </span>
-
-                    <strong
-                        style="
-                            display:block;
-                            margin-top:5px;
-                        "
-                    >
-                        ${escapeHTML(phone)}
-                    </strong>
-
-                </div>
-
-            </div>
-
-            <h3
-                style="
-                    margin-bottom:10px;
-                    font-size:14px;
-                "
-            >
-                Items
-            </h3>
-
-            <div>
-                ${itemsHTML}
-            </div>
-
-            <div
-                style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    margin-top:22px;
-                    padding-top:18px;
-                    border-top:1px solid var(--border);
-                "
-            >
-
-                <div>
-
-                    <span
-                        style="
-                            display:block;
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        PAYMENT
-                    </span>
-
-                    <strong>
-                        ${escapeHTML(payment)}
-                    </strong>
-
-                </div>
-
-                <div style="text-align:right;">
-
-                    <span
-                        style="
-                            display:block;
-                            font-size:10px;
-                            color:var(--text-light);
-                        "
-                    >
-                        TOTAL
-                    </span>
-
-                    <strong
-                        style="
-                            font-size:20px;
-                            color:var(--primary);
-                        "
-                    >
-                        ₹${formatCurrency(amount)}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-    saleModal.classList.add("show");
-    document.body.classList.add("modal-open");
 };
 
 // ==========================================
@@ -590,7 +833,9 @@ window.viewSale = async function (id) {
 // ==========================================
 
 function closeModal() {
+
     saleModal.classList.remove("show");
+
     document.body.classList.remove("modal-open");
 }
 
@@ -658,19 +903,25 @@ function escapeHTML(value) {
 // SEARCH
 // ==========================================
 
-searchInput.addEventListener(
-    "input",
-    renderSales
-);
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        renderSales
+    );
+}
 
 // ==========================================
 // PAYMENT FILTER
 // ==========================================
 
-paymentFilter.addEventListener(
-    "change",
-    renderSales
-);
+if (paymentFilter) {
+
+    paymentFilter.addEventListener(
+        "change",
+        renderSales
+    );
+}
 
 // ==========================================
 // CLOSE SALE MODAL
@@ -688,16 +939,19 @@ if (closeSaleModal) {
 // CLOSE MODAL OUTSIDE
 // ==========================================
 
-saleModal.addEventListener(
-    "click",
-    function (event) {
+if (saleModal) {
 
-        if (event.target === saleModal) {
-            closeModal();
+    saleModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (event.target === saleModal) {
+                closeModal();
+            }
+
         }
-
-    }
-);
+    );
+}
 
 // ==========================================
 // MOBILE SIDEBAR
@@ -725,7 +979,6 @@ if (
             sidebar.classList.add("open");
 
             sidebarOverlay.classList.add("show");
-
         }
     );
 
@@ -736,7 +989,6 @@ if (
             sidebar.classList.remove("open");
 
             sidebarOverlay.classList.remove("show");
-
         }
     );
 }
