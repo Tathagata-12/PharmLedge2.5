@@ -10,6 +10,7 @@ const createBatch = async (req, res) => {
 
         const {
             medicine_id,
+            vendor_id,
             batch_number,
             quantity,
             purchase_price,
@@ -74,6 +75,28 @@ const createBatch = async (req, res) => {
         }
 
         // ==========================================
+        // CHECK VENDOR OWNERSHIP
+        // ==========================================
+
+        if (vendor_id !== undefined && vendor_id !== null && vendor_id !== "") {
+            const vendorCheck = await pool.query(
+                `
+                SELECT id
+                FROM vendors
+                WHERE id = $1
+                AND user_id = $2
+                `,
+                [vendor_id, userId]
+            );
+
+            if (vendorCheck.rows.length === 0) {
+                return res.status(404).json({
+                    message: "Vendor not found"
+                });
+            }
+        }
+
+        // ==========================================
         // CHECK DUPLICATE BATCH
         // ==========================================
 
@@ -103,6 +126,7 @@ const createBatch = async (req, res) => {
             (
                 medicine_id,
                 user_id,
+                vendor_id,
                 batch_number,
                 quantity,
                 purchase_price,
@@ -110,12 +134,13 @@ const createBatch = async (req, res) => {
                 manufacturing_date,
                 expiry_date
             )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
             RETURNING *
             `,
             [
                 medicine_id,
                 userId,
+                vendor_id || null,
                 batch_number,
                 quantity,
                 purchase_price,
@@ -140,6 +165,7 @@ const createBatch = async (req, res) => {
 };
 
 
+
 // ==========================================
 // GET ALL BATCHES
 // GET /api/batches
@@ -155,6 +181,7 @@ const getAllBatches = async (req, res) => {
                 mb.id,
                 mb.medicine_id,
                 mb.user_id,
+                mb.vendor_id,
                 mb.batch_number,
                 mb.quantity,
                 mb.purchase_price,
@@ -163,12 +190,24 @@ const getAllBatches = async (req, res) => {
                 mb.expiry_date,
                 mb.created_at,
                 mb.updated_at,
-                m.name AS medicine_name
+
+                m.name AS medicine_name,
+                v.name AS vendor_name
+
             FROM medicine_batches mb
+
             INNER JOIN medicines m
                 ON mb.medicine_id = m.id
+
+            LEFT JOIN vendors v
+                ON mb.vendor_id = v.id
+                AND v.user_id = $1
+
             WHERE mb.user_id = $1
-            ORDER BY mb.expiry_date ASC NULLS LAST, mb.id DESC
+
+            ORDER BY
+                mb.expiry_date ASC NULLS LAST,
+                mb.id DESC
             `,
             [userId]
         );
@@ -224,11 +263,17 @@ const getBatchesByMedicine = async (req, res) => {
 
         const result = await pool.query(
             `
-            SELECT *
-            FROM medicine_batches
-            WHERE medicine_id = $1
-            AND user_id = $2
-            ORDER BY expiry_date ASC NULLS LAST
+            SELECT
+                mb.*,
+                v.name AS vendor_name
+            FROM medicine_batches mb
+            LEFT JOIN vendors v
+                ON mb.vendor_id = v.id
+                AND v.user_id = $2
+            WHERE mb.medicine_id = $1
+            AND mb.user_id = $2
+            ORDER BY
+                mb.expiry_date ASC NULLS LAST
             `,
             [medicineId, userId]
         );
@@ -260,6 +305,7 @@ const updateBatch = async (req, res) => {
 
         const {
             medicine_id,
+            vendor_id,
             batch_number,
             quantity,
             purchase_price,
@@ -342,6 +388,32 @@ const updateBatch = async (req, res) => {
         }
 
         // ==========================================
+        // CHECK VENDOR IF PROVIDED
+        // ==========================================
+
+        if (
+            vendor_id !== undefined &&
+            vendor_id !== null &&
+            vendor_id !== ""
+        ) {
+            const vendorCheck = await pool.query(
+                `
+                SELECT id
+                FROM vendors
+                WHERE id = $1
+                AND user_id = $2
+                `,
+                [vendor_id, userId]
+            );
+
+            if (vendorCheck.rows.length === 0) {
+                return res.status(404).json({
+                    message: "Vendor not found"
+                });
+            }
+        }
+
+        // ==========================================
         // CHECK DUPLICATE BATCH NUMBER
         // ==========================================
 
@@ -373,19 +445,21 @@ const updateBatch = async (req, res) => {
             UPDATE medicine_batches
             SET
                 medicine_id = COALESCE($1, medicine_id),
-                batch_number = COALESCE($2, batch_number),
-                quantity = COALESCE($3, quantity),
-                purchase_price = COALESCE($4, purchase_price),
-                selling_price = COALESCE($5, selling_price),
-                manufacturing_date = COALESCE($6, manufacturing_date),
-                expiry_date = COALESCE($7, expiry_date),
+                vendor_id = COALESCE($2, vendor_id),
+                batch_number = COALESCE($3, batch_number),
+                quantity = COALESCE($4, quantity),
+                purchase_price = COALESCE($5, purchase_price),
+                selling_price = COALESCE($6, selling_price),
+                manufacturing_date = COALESCE($7, manufacturing_date),
+                expiry_date = COALESCE($8, expiry_date),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $8
-            AND user_id = $9
+            WHERE id = $9
+            AND user_id = $10
             RETURNING *
             `,
             [
                 medicine_id,
+                vendor_id,
                 batch_number,
                 quantity,
                 purchase_price,

@@ -11,6 +11,7 @@ const vendorRoutes = require("./routes/vendorRoutes");
 const salesRoutes = require("./routes/salesRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const billingRoutes = require("./routes/billingRoutes");
+const ledgerRoutes = require("./routes/ledgerRoutes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/vendors", vendorRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/billing", billingRoutes);
+app.use("/api/ledger", ledgerRoutes);
 
 // ==========================================
 // TEST API
