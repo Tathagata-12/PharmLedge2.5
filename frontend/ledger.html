@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>PharmLedge | Vendor Ledger</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="app-page">
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR OVERLAY -->
+    <!-- ========================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR -->
+    <!-- ========================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="brand-icon">
+                ✚
+            </div>
+
+            <span>
+                Pharm<span>Ledge</span>
+            </span>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="nav-label">
+                MAIN
+            </p>
+
+            <a
+                href="dashboard.html"
+                class="nav-item">
+
+                <span class="nav-icon">⌂</span>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a
+                href="medicines.html"
+                class="nav-item">
+
+                <span class="nav-icon">💊</span>
+
+                <span>Medicines</span>
+
+            </a>
+
+
+            <a
+                href="stock.html"
+                class="nav-item">
+
+                <span class="nav-icon">📦</span>
+
+                <span>Stock</span>
+
+            </a>
+
+
+            <a
+                href="vendors.html"
+                class="nav-item active">
+
+                <span class="nav-icon">🏢</span>
+
+                <span>Vendors</span>
+
+            </a>
+
+
+            <p class="nav-label">
+                BUSINESS
+            </p>
+
+
+            <a
+                href="billing.html"
+                class="nav-item">
+
+                <span class="nav-icon">🧾</span>
+
+                <span>Billing</span>
+
+            </a>
+
+
+            <a
+                href="sales.html"
+                class="nav-item">
+
+                <span class="nav-icon">📈</span>
+
+                <span>Sales History</span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- SIDEBAR USER -->
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div
+                    class="user-avatar"
+                    id="userAvatar">
+
+                    U
+
+                </div>
+
+
+                <div class="sidebar-user-info">
+
+                    <strong id="sidebarUserName">
+                        User
+                    </strong>
+
+                    <span id="sidebarUserEmail">
+                        user@example.com
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="logout-btn"
+                type="button"
+                onclick="logout()">
+
+                <span>↪</span>
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ========================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>
+                    Vendor Ledger
+                </h1>
+
+                <p>
+                    Track purchases, payments and outstanding balance
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <div class="topbar-user">
+
+                    <div
+                        class="user-avatar"
+                        id="topUserAvatar">
+
+                        U
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="topUserName">
+                            User
+                        </strong>
+
+                        <span>
+                            Pharmacy Admin
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ========================================== -->
+        <!-- CONTENT -->
+        <!-- ========================================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- BACK BUTTON -->
+
+            <div class="page-header">
+
+                <div>
+
+                    <h2 id="vendorName">
+                        Loading vendor...
+                    </h2>
+
+                    <p id="vendorContact">
+                        Loading vendor information...
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="goBackToVendors()">
+
+                    ← Back to Vendors
+
+                </button>
+
+            </div>
+
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="ledgerMessage"
+                class="auth-message hidden">
+            </div>
+
+
+
+            <!-- ========================================== -->
+            <!-- SUMMARY CARDS -->
+            <!-- ========================================== -->
+
+            <div class="stats-grid">
+
+
+                <!-- TOTAL PURCHASE -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🛒
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Total Purchases
+                        </span>
+
+                        <strong id="totalPurchases">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL PAID -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        💰
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Total Paid
+                        </span>
+
+                        <strong id="totalPaid">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- OUTSTANDING -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ⚠️
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Outstanding
+                        </span>
+
+                        <strong id="outstandingBalance">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ========================================== -->
+            <!-- LEDGER TABLE -->
+            <!-- ========================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Transaction History
+                        </h3>
+
+                        <p id="transactionCount">
+                            Loading transactions...
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="addPaymentBtn">
+
+                        + Add Payment
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table class="data-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Type
+                                </th>
+
+                                <th>
+                                    Description
+                                </th>
+
+                                <th>
+                                    Debit
+                                </th>
+
+                                <th>
+                                    Credit
+                                </th>
+
+                                <th>
+                                    Balance
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="ledgerTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="loading-state">
+
+                                    Loading ledger...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ========================================== -->
+    <!-- PAYMENT MODAL -->
+    <!-- ========================================== -->
+
+    <div
+        class="modal-overlay"
+        id="paymentModal">
+
+        <div class="modal-card">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        Add Vendor Payment
+                    </h2>
+
+                    <p>
+                        Record a payment made to this vendor
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closePaymentModalBtn">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- PAYMENT FORM -->
+
+            <form id="paymentForm">
+
+
+                <div class="form-grid">
+
+
+                    <!-- AMOUNT -->
+
+                    <div class="form-group">
+
+                        <label for="paymentAmount">
+                            Payment Amount *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="paymentAmount"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="e.g. 5000"
+                            required>
+
+                    </div>
+
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="form-group form-group-full">
+
+                        <label for="paymentDescription">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="paymentDescription"
+                            rows="4"
+                            placeholder="e.g. Payment against invoice INV-102">
+                        </textarea>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- MODAL FOOTER -->
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelPaymentBtn">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="savePaymentBtn">
+
+                        Save Payment
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================== -->
+
+    <script src="js/api.js"></script>
+
+    <script src="js/auth.js"></script>
+
+    <script src="js/ledger.js"></script>
+
+</body>
+
+</html>

@@ -79,7 +79,6 @@ function loadUser() {
     const email =
         user.email || "";
 
-
     const sidebarName =
         document.getElementById("sidebarUserName");
 
@@ -95,7 +94,6 @@ function loadUser() {
     const topUserAvatar =
         document.getElementById("topUserAvatar");
 
-
     if (sidebarName) {
         sidebarName.textContent = name;
     }
@@ -108,10 +106,8 @@ function loadUser() {
         topName.textContent = name;
     }
 
-
     const letter =
         name.charAt(0).toUpperCase();
-
 
     if (userAvatar) {
         userAvatar.textContent = letter;
@@ -129,24 +125,26 @@ function loadUser() {
 
 async function loadVendors() {
 
-    vendorTableBody.innerHTML = `
-        <tr>
-            <td
-                colspan="5"
-                class="loading-state">
-                Loading vendors...
-            </td>
-        </tr>
-    `;
+    if (vendorTableBody) {
+
+        vendorTableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="5"
+                    class="loading-state">
+                    Loading vendors...
+                </td>
+            </tr>
+        `;
+    }
 
     try {
 
         const response =
             await getVendors();
 
-
         /*
-         * Controller response:
+         * Expected response:
          *
          * {
          *     count: number,
@@ -154,11 +152,21 @@ async function loadVendors() {
          * }
          */
 
-        vendors =
-            Array.isArray(response)
-                ? response
-                : response.vendors || [];
+        if (Array.isArray(response)) {
 
+            vendors = response;
+
+        } else if (
+            response &&
+            Array.isArray(response.vendors)
+        ) {
+
+            vendors = response.vendors;
+
+        } else {
+
+            vendors = [];
+        }
 
         renderVendors(vendors);
 
@@ -169,21 +177,24 @@ async function loadVendors() {
             error
         );
 
+        if (vendorTableBody) {
 
-        vendorTableBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="5"
-                    class="empty-table">
-                    Unable to load vendors.
-                </td>
-            </tr>
-        `;
+            vendorTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="5"
+                        class="empty-table">
+                        Unable to load vendors.
+                    </td>
+                </tr>
+            `;
+        }
 
+        if (vendorCount) {
 
-        vendorCount.textContent =
-            "Unable to load vendors";
-
+            vendorCount.textContent =
+                "Unable to load vendors";
+        }
 
         showMessage(
             error.message ||
@@ -199,6 +210,10 @@ async function loadVendors() {
 // ==========================================
 
 function renderVendors(vendorList) {
+
+    if (!vendorTableBody) {
+        return;
+    }
 
     if (!vendorList.length) {
 
@@ -228,20 +243,25 @@ function renderVendors(vendorList) {
             </tr>
         `;
 
+        if (vendorCount) {
 
-        vendorCount.textContent =
-            "0 vendors";
+            vendorCount.textContent =
+                "0 vendors";
+        }
 
         return;
     }
 
 
-    vendorCount.textContent =
-        `${vendorList.length} vendor${
-            vendorList.length === 1
-                ? ""
-                : "s"
-        }`;
+    if (vendorCount) {
+
+        vendorCount.textContent =
+            `${vendorList.length} vendor${
+                vendorList.length === 1
+                    ? ""
+                    : "s"
+            }`;
+    }
 
 
     vendorTableBody.innerHTML =
@@ -249,6 +269,8 @@ function renderVendors(vendorList) {
 
             return `
                 <tr>
+
+                    <!-- VENDOR -->
 
                     <td>
                         <strong>
@@ -259,12 +281,16 @@ function renderVendors(vendorList) {
                     </td>
 
 
+                    <!-- CONTACT -->
+
                     <td>
                         ${escapeHTML(
                             vendor.contact || "-"
                         )}
                     </td>
 
+
+                    <!-- EMAIL -->
 
                     <td>
                         ${escapeHTML(
@@ -273,6 +299,8 @@ function renderVendors(vendorList) {
                     </td>
 
 
+                    <!-- ADDRESS -->
+
                     <td>
                         ${escapeHTML(
                             vendor.address || "-"
@@ -280,30 +308,51 @@ function renderVendors(vendorList) {
                     </td>
 
 
+                    <!-- ACTIONS -->
+
                     <td>
 
                         <div class="table-actions">
 
+
+                            <!-- VIEW LEDGER -->
+
+                            <button
+                                type="button"
+                                class="table-action"
+                                onclick="viewVendorLedger(${Number(vendor.id)})"
+                                title="View Vendor Ledger">
+
+                                📒
+
+                            </button>
+
+
+                            <!-- EDIT -->
+
                             <button
                                 type="button"
                                 class="table-action edit"
-                                onclick="editVendor(${vendor.id})"
-                                title="Edit">
+                                onclick="editVendor(${Number(vendor.id)})"
+                                title="Edit Vendor">
 
                                 ✏️
 
                             </button>
 
 
+                            <!-- DELETE -->
+
                             <button
                                 type="button"
                                 class="table-action delete"
-                                onclick="deleteVendor(${vendor.id})"
-                                title="Delete">
+                                onclick="deleteVendor(${Number(vendor.id)})"
+                                title="Delete Vendor">
 
                                 🗑️
 
                             </button>
+
 
                         </div>
 
@@ -317,16 +366,59 @@ function renderVendors(vendorList) {
 
 
 // ==========================================
+// VIEW VENDOR LEDGER
+// ==========================================
+
+window.viewVendorLedger =
+    function (id) {
+
+        const vendorIdNumber =
+            Number(id);
+
+        if (
+            !Number.isInteger(vendorIdNumber) ||
+            vendorIdNumber <= 0
+        ) {
+
+            showMessage(
+                "Invalid vendor.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        /*
+         * Open the ledger page.
+         *
+         * The vendor ID is passed through
+         * the URL so ledger.js can read it:
+         *
+         * ledger.html?vendorId=1
+         */
+
+        window.location.href =
+            `ledger.html?vendorId=${encodeURIComponent(
+                vendorIdNumber
+            )}`;
+    };
+
+
+// ==========================================
 // SEARCH VENDORS
 // ==========================================
 
 function searchVendors() {
 
+    if (!vendorSearchInput) {
+        return;
+    }
+
     const searchTerm =
         vendorSearchInput.value
             .trim()
             .toLowerCase();
-
 
     if (!searchTerm) {
 
@@ -375,7 +467,7 @@ function searchVendors() {
 
 
 // ==========================================
-// OPEN ADD MODAL
+// OPEN ADD VENDOR MODAL
 // ==========================================
 
 function openAddVendorModal() {
@@ -386,19 +478,16 @@ function openAddVendorModal() {
     saveVendorBtn.textContent =
         "Save Vendor";
 
-
     vendorForm.reset();
 
     vendorId.value = "";
 
-
     vendorModal.classList.add("show");
-
 }
 
 
 // ==========================================
-// OPEN EDIT MODAL
+// OPEN EDIT VENDOR MODAL
 // ==========================================
 
 window.editVendor =
@@ -452,7 +541,7 @@ window.editVendor =
 
 
 // ==========================================
-// CLOSE MODAL
+// CLOSE VENDOR MODAL
 // ==========================================
 
 function closeVendorModal() {
@@ -462,6 +551,12 @@ function closeVendorModal() {
     vendorForm.reset();
 
     vendorId.value = "";
+
+    saveVendorBtn.textContent =
+        "Save Vendor";
+
+    saveVendorBtn.disabled =
+        false;
 }
 
 
@@ -510,14 +605,18 @@ async function saveVendor(event) {
 
         address:
             address || null
-
     };
 
 
-    saveVendorBtn.disabled = true;
+    const editingVendor =
+        Boolean(vendorId.value);
+
+
+    saveVendorBtn.disabled =
+        true;
 
     saveVendorBtn.textContent =
-        vendorId.value
+        editingVendor
             ? "Updating..."
             : "Saving...";
 
@@ -531,7 +630,7 @@ async function saveVendor(event) {
         // UPDATE
         // ==================================
 
-        if (vendorId.value) {
+        if (editingVendor) {
 
             response =
                 await updateVendor(
@@ -545,8 +644,8 @@ async function saveVendor(event) {
                 "Vendor updated successfully.",
                 "success"
             );
-
         }
+
 
         // ==================================
         // CREATE
@@ -588,15 +687,23 @@ async function saveVendor(event) {
         );
 
 
-    } finally {
-
-        saveVendorBtn.disabled = false;
+        saveVendorBtn.disabled =
+            false;
 
         saveVendorBtn.textContent =
-            vendorId.value
+            editingVendor
                 ? "Update Vendor"
                 : "Save Vendor";
+
+        return;
     }
+
+
+    saveVendorBtn.disabled =
+        false;
+
+    saveVendorBtn.textContent =
+        "Save Vendor";
 }
 
 
@@ -640,12 +747,74 @@ window.deleteVendor =
 
         try {
 
-            const response =
-                await deleteVendor(id);
+            /*
+             * IMPORTANT:
+             *
+             * The API helper should be named
+             * deleteVendor in api.js.
+             *
+             * We call it through this local
+             * reference to avoid recursively
+             * calling window.deleteVendor().
+             */
+
+            const deleteVendorAPI =
+                window.apiDeleteVendor ||
+                window.deleteVendorAPI;
+
+
+            let response;
+
+
+            if (typeof deleteVendorAPI === "function") {
+
+                response =
+                    await deleteVendorAPI(id);
+
+            } else {
+
+                /*
+                 * Fallback:
+                 * Direct API request.
+                 */
+
+                const token =
+                    localStorage.getItem("token");
+
+
+                const fetchResponse =
+                    await fetch(
+                        `/api/vendors/${encodeURIComponent(id)}`,
+                        {
+                            method: "DELETE",
+
+                            headers: {
+                                "Authorization":
+                                    "Bearer " + token,
+
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+
+                response =
+                    await fetchResponse.json();
+
+
+                if (!fetchResponse.ok) {
+
+                    throw new Error(
+                        response.message ||
+                        "Unable to delete vendor."
+                    );
+                }
+            }
 
 
             showMessage(
-                response.message ||
+                response?.message ||
                 "Vendor deleted successfully.",
                 "success"
             );
@@ -676,6 +845,10 @@ window.deleteVendor =
 // ==========================================
 
 function showMessage(message, type) {
+
+    if (!vendorMessage) {
+        return;
+    }
 
     vendorMessage.textContent =
         message;
@@ -713,62 +886,83 @@ function escapeHTML(value) {
 // ADD VENDOR BUTTON
 // ==========================================
 
-addVendorBtn.addEventListener(
-    "click",
-    openAddVendorModal
-);
+if (addVendorBtn) {
+
+    addVendorBtn.addEventListener(
+        "click",
+        openAddVendorModal
+    );
+}
 
 
 // ==========================================
 // CLOSE MODAL
 // ==========================================
 
-closeVendorModalBtn.addEventListener(
-    "click",
-    closeVendorModal
-);
+if (closeVendorModalBtn) {
+
+    closeVendorModalBtn.addEventListener(
+        "click",
+        closeVendorModal
+    );
+}
 
 
-cancelVendorModalBtn.addEventListener(
-    "click",
-    closeVendorModal
-);
+if (cancelVendorModalBtn) {
+
+    cancelVendorModalBtn.addEventListener(
+        "click",
+        closeVendorModal
+    );
+}
 
 
 // ==========================================
 // CLICK OUTSIDE MODAL
 // ==========================================
 
-vendorModal.addEventListener(
-    "click",
-    function (event) {
+if (vendorModal) {
 
-        if (event.target === vendorModal) {
+    vendorModal.addEventListener(
+        "click",
+        function (event) {
 
-            closeVendorModal();
+            if (
+                event.target ===
+                vendorModal
+            ) {
+
+                closeVendorModal();
+            }
         }
-    }
-);
+    );
+}
 
 
 // ==========================================
 // FORM SUBMIT
 // ==========================================
 
-vendorForm.addEventListener(
-    "submit",
-    saveVendor
-);
+if (vendorForm) {
+
+    vendorForm.addEventListener(
+        "submit",
+        saveVendor
+    );
+}
 
 
 // ==========================================
 // SEARCH
 // ==========================================
 
-vendorSearchInput.addEventListener(
-    "input",
-    searchVendors
-);
+if (vendorSearchInput) {
+
+    vendorSearchInput.addEventListener(
+        "input",
+        searchVendors
+    );
+}
 
 
 // ==========================================
@@ -791,34 +985,41 @@ const sidebarOverlay =
     );
 
 
-mobileMenuBtn.addEventListener(
-    "click",
-    function () {
+if (
+    mobileMenuBtn &&
+    sidebar &&
+    sidebarOverlay
+) {
 
-        sidebar.classList.add(
-            "open"
-        );
+    mobileMenuBtn.addEventListener(
+        "click",
+        function () {
 
-        sidebarOverlay.classList.add(
-            "show"
-        );
-    }
-);
+            sidebar.classList.add(
+                "open"
+            );
+
+            sidebarOverlay.classList.add(
+                "show"
+            );
+        }
+    );
 
 
-sidebarOverlay.addEventListener(
-    "click",
-    function () {
+    sidebarOverlay.addEventListener(
+        "click",
+        function () {
 
-        sidebar.classList.remove(
-            "open"
-        );
+            sidebar.classList.remove(
+                "open"
+            );
 
-        sidebarOverlay.classList.remove(
-            "show"
-        );
-    }
-);
+            sidebarOverlay.classList.remove(
+                "show"
+            );
+        }
+    );
+}
 
 
 // ==========================================

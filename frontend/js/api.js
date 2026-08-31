@@ -1,4 +1,6 @@
 const API_BASE_URL = "https://pharmledge2-5.onrender.com/api";
+
+
 // ==========================================
 // AUTH TOKEN
 // ==========================================
@@ -6,6 +8,7 @@ const API_BASE_URL = "https://pharmledge2-5.onrender.com/api";
 function getToken() {
     return localStorage.getItem("pharmledge_token");
 }
+
 
 // ==========================================
 // COMMON API REQUEST
@@ -34,19 +37,35 @@ async function apiRequest(endpoint, options = {}) {
             }
         );
 
-        // No content response
+        // ==========================================
+        // NO CONTENT RESPONSE
+        // ==========================================
+
         if (response.status === 204) {
             return null;
         }
 
-        // Try to read JSON response
+
+        // ==========================================
+        // READ JSON RESPONSE
+        // ==========================================
+
         let data;
 
         try {
+
             data = await response.json();
+
         } catch (jsonError) {
+
             data = {};
+
         }
+
+
+        // ==========================================
+        // HANDLE API ERROR
+        // ==========================================
 
         if (!response.ok) {
 
@@ -54,13 +73,19 @@ async function apiRequest(endpoint, options = {}) {
                 data.message ||
                 `Request failed with status ${response.status}`
             );
+
         }
+
 
         return data;
 
+
     } catch (error) {
 
-        console.error("API Error:", error);
+        console.error(
+            "API Error:",
+            error
+        );
 
         throw error;
     }
@@ -73,32 +98,38 @@ async function apiRequest(endpoint, options = {}) {
 
 async function login(email, password) {
 
-    return await apiRequest("/auth/login", {
+    return await apiRequest(
+        "/auth/login",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify({
-            email,
-            password
-        })
-
-    });
+            body: JSON.stringify({
+                email,
+                password
+            })
+        }
+    );
 }
 
 
-async function register(name, email, password) {
+async function register(
+    name,
+    email,
+    password
+) {
 
-    return await apiRequest("/auth/register", {
+    return await apiRequest(
+        "/auth/register",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify({
-            name,
-            email,
-            password
-        })
-
-    });
+            body: JSON.stringify({
+                name,
+                email,
+                password
+            })
+        }
+    );
 }
 
 
@@ -108,7 +139,9 @@ async function register(name, email, password) {
 
 async function getMedicines() {
 
-    return await apiRequest("/medicines");
+    return await apiRequest(
+        "/medicines"
+    );
 }
 
 
@@ -122,22 +155,27 @@ async function getMedicine(id) {
 
 async function createMedicine(data) {
 
-    return await apiRequest("/medicines", {
+    return await apiRequest(
+        "/medicines",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify(data)
-
-    });
+            body: JSON.stringify(data)
+        }
+    );
 }
 
 
-async function updateMedicine(id, data) {
+async function updateMedicine(
+    id,
+    data
+) {
 
     return await apiRequest(
         `/medicines/${id}`,
         {
             method: "PUT",
+
             body: JSON.stringify(data)
         }
     );
@@ -161,28 +199,35 @@ async function deleteMedicine(id) {
 
 async function getBatches() {
 
-    return await apiRequest("/batches");
+    return await apiRequest(
+        "/batches"
+    );
 }
 
 
 async function createBatch(data) {
 
-    return await apiRequest("/batches", {
+    return await apiRequest(
+        "/batches",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify(data)
-
-    });
+            body: JSON.stringify(data)
+        }
+    );
 }
 
 
-async function updateBatch(id, data) {
+async function updateBatch(
+    id,
+    data
+) {
 
     return await apiRequest(
         `/batches/${id}`,
         {
             method: "PUT",
+
             body: JSON.stringify(data)
         }
     );
@@ -204,7 +249,9 @@ async function deleteBatch(id) {
 // BILLING BATCHES
 // ==========================================
 
-async function getMedicineBatches(medicineId) {
+async function getMedicineBatches(
+    medicineId
+) {
 
     return await apiRequest(
         `/billing/medicines/${medicineId}/batches`
@@ -218,7 +265,9 @@ async function getMedicineBatches(medicineId) {
 
 async function getVendors() {
 
-    return await apiRequest("/vendors");
+    return await apiRequest(
+        "/vendors"
+    );
 }
 
 
@@ -232,22 +281,27 @@ async function getVendor(id) {
 
 async function createVendor(data) {
 
-    return await apiRequest("/vendors", {
+    return await apiRequest(
+        "/vendors",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify(data)
-
-    });
+            body: JSON.stringify(data)
+        }
+    );
 }
 
 
-async function updateVendor(id, data) {
+async function updateVendor(
+    id,
+    data
+) {
 
     return await apiRequest(
         `/vendors/${id}`,
         {
             method: "PUT",
+
             body: JSON.stringify(data)
         }
     );
@@ -266,24 +320,80 @@ async function deleteVendor(id) {
 
 
 // ==========================================
+// VENDOR LEDGER
+// ==========================================
+
+// GET COMPLETE VENDOR LEDGER
+// GET /api/ledger/vendor/:vendorId
+
+async function getVendorLedger(
+    vendorId
+) {
+
+    return await apiRequest(
+        `/ledger/vendor/${vendorId}`
+    );
+}
+
+
+// ==========================================
+// GET VENDOR BALANCE
+// GET /api/ledger/vendor/:vendorId/balance
+// ==========================================
+
+async function getVendorBalance(
+    vendorId
+) {
+
+    return await apiRequest(
+        `/ledger/vendor/${vendorId}/balance`
+    );
+}
+
+
+// ==========================================
+// ADD PAYMENT TO VENDOR
+// POST /api/ledger/vendor/:vendorId/payment
+// ==========================================
+
+async function addVendorPayment(
+    vendorId,
+    data
+) {
+
+    return await apiRequest(
+        `/ledger/vendor/${vendorId}/payment`,
+        {
+            method: "POST",
+
+            body: JSON.stringify(data)
+        }
+    );
+}
+
+
+// ==========================================
 // SALES / BILLING
 // ==========================================
 
 async function createSale(data) {
 
-    return await apiRequest("/sales", {
+    return await apiRequest(
+        "/sales",
+        {
+            method: "POST",
 
-        method: "POST",
-
-        body: JSON.stringify(data)
-
-    });
+            body: JSON.stringify(data)
+        }
+    );
 }
 
 
 async function getSales() {
 
-    return await apiRequest("/sales");
+    return await apiRequest(
+        "/sales"
+    );
 }
 
 
