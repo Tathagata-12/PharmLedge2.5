@@ -56,13 +56,19 @@ const addPaymentBtn =
     document.getElementById("addPaymentBtn");
 
 const closePaymentModalBtn =
-    document.getElementById("closePaymentModalBtn");
+    document.getElementById(
+        "closePaymentModalBtn"
+    );
 
 const cancelPaymentBtn =
-    document.getElementById("cancelPaymentBtn");
+    document.getElementById(
+        "cancelPaymentBtn"
+    );
 
 const savePaymentBtn =
-    document.getElementById("savePaymentBtn");
+    document.getElementById(
+        "savePaymentBtn"
+    );
 
 
 // ==========================================
@@ -86,19 +92,29 @@ function loadUser() {
 
 
     const sidebarName =
-        document.getElementById("sidebarUserName");
+        document.getElementById(
+            "sidebarUserName"
+        );
 
     const sidebarEmail =
-        document.getElementById("sidebarUserEmail");
+        document.getElementById(
+            "sidebarUserEmail"
+        );
 
     const topName =
-        document.getElementById("topUserName");
+        document.getElementById(
+            "topUserName"
+        );
 
     const userAvatar =
-        document.getElementById("userAvatar");
+        document.getElementById(
+            "userAvatar"
+        );
 
     const topUserAvatar =
-        document.getElementById("topUserAvatar");
+        document.getElementById(
+            "topUserAvatar"
+        );
 
 
     if (sidebarName) {
@@ -141,20 +157,54 @@ function validateVendorId() {
             "error"
         );
 
-        ledgerTableBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="6"
-                    class="empty-table">
 
-                    Invalid vendor.
+        if (ledgerTableBody) {
 
-                </td>
-            </tr>
-        `;
+            ledgerTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-table">
+
+                        Invalid vendor.
+
+                    </td>
+                </tr>
+            `;
+        }
 
         return false;
     }
+
+
+    // Make sure the ID is numeric
+
+    if (!/^\d+$/.test(String(vendorId))) {
+
+        showMessage(
+            "Invalid vendor ID.",
+            "error"
+        );
+
+
+        if (ledgerTableBody) {
+
+            ledgerTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-table">
+
+                        Invalid vendor.
+
+                    </td>
+                </tr>
+            `;
+        }
+
+        return false;
+    }
+
 
     return true;
 }
@@ -171,68 +221,38 @@ async function loadLedger() {
     }
 
 
-    ledgerTableBody.innerHTML = `
-        <tr>
-            <td
-                colspan="6"
-                class="loading-state">
+    if (ledgerTableBody) {
 
-                Loading ledger...
+        ledgerTableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="6"
+                    class="loading-state">
 
-            </td>
-        </tr>
-    `;
+                    Loading ledger...
+
+                </td>
+            </tr>
+        `;
+    }
 
 
     try {
 
         // ==================================
-        // GET LEDGER
+        // GET COMPLETE LEDGER
         // ==================================
 
         const response =
-            await getVendorLedger(vendorId);
+            await getVendorLedger(
+                vendorId
+            );
 
 
         console.log(
-            "Vendor ledger:",
+            "Vendor ledger response:",
             response
         );
-
-
-        // ==================================
-        // GET BALANCE
-        // ==================================
-
-        let balanceResponse = null;
-
-        try {
-
-            balanceResponse =
-                await getVendorBalance(
-                    vendorId
-                );
-
-        } catch (balanceError) {
-
-            console.warn(
-                "Unable to load vendor balance:",
-                balanceError
-            );
-        }
-
-
-        // ==================================
-        // NORMALIZE RESPONSE
-        // ==================================
-
-        const ledger =
-            Array.isArray(response)
-                ? response
-                : response.ledger ||
-                  response.transactions ||
-                  response.entries ||
-                  [];
 
 
         // ==================================
@@ -240,128 +260,112 @@ async function loadLedger() {
         // ==================================
 
         const vendor =
-            response.vendor ||
-            response.vendor_info ||
-            null;
+            response &&
+            response.vendor
+                ? response.vendor
+                : null;
 
 
         if (vendor) {
 
-            vendorName.textContent =
-                vendor.name || "Vendor";
+            if (vendorName) {
 
-            vendorContact.textContent =
-                vendor.contact ||
-                vendor.email ||
-                "Vendor information";
+                vendorName.textContent =
+                    vendor.name ||
+                    "Vendor";
+            }
 
+
+            if (vendorContact) {
+
+                vendorContact.textContent =
+                    vendor.contact ||
+                    vendor.email ||
+                    "Vendor information";
+            }
         }
 
 
         // ==================================
-        // CALCULATE SUMMARY
+        // GET TRANSACTIONS
         // ==================================
 
-        let purchases = 0;
+        const transactions =
+            response &&
+            Array.isArray(
+                response.transactions
+            )
+                ? response.transactions
+                : [];
 
-        let payments = 0;
 
-        let runningBalance = 0;
+        // ==================================
+        // SUMMARY FROM BACKEND
+        // ==================================
+
+        const summary =
+            response &&
+            response.summary
+                ? response.summary
+                : {};
 
 
-        ledger.forEach(function (entry) {
+        const purchases =
+            Number(
+                summary.total_purchases || 0
+            );
 
-            const amount =
-                Number(
-                    entry.amount ||
-                    entry.total_amount ||
-                    entry.purchase_amount ||
-                    entry.payment_amount ||
-                    0
+
+        const payments =
+            Number(
+                summary.total_payments || 0
+            );
+
+
+        const outstanding =
+            Number(
+                summary.outstanding_balance || 0
+            );
+
+
+        // ==================================
+        // UPDATE SUMMARY CARDS
+        // ==================================
+
+        if (totalPurchases) {
+
+            totalPurchases.textContent =
+                formatCurrency(
+                    purchases
                 );
+        }
 
 
-            const type =
-                String(
-                    entry.type ||
-                    entry.transaction_type ||
-                    entry.entry_type ||
-                    ""
-                ).toLowerCase();
+        if (totalPaid) {
 
-
-            if (
-                type.includes("purchase") ||
-                type.includes("debit") ||
-                type.includes("stock")
-            ) {
-
-                purchases += amount;
-
-            } else if (
-                type.includes("payment") ||
-                type.includes("credit")
-            ) {
-
-                payments += amount;
-
-            }
-
-        });
-
-
-        // ==================================
-        // USE BALANCE API IF AVAILABLE
-        // ==================================
-
-        if (balanceResponse) {
-
-            const apiBalance =
-                Number(
-                    balanceResponse.balance ??
-                    balanceResponse.outstanding_balance ??
-                    balanceResponse.amount ??
-                    0
+            totalPaid.textContent =
+                formatCurrency(
+                    payments
                 );
+        }
 
 
-            if (
-                !Number.isNaN(apiBalance)
-            ) {
+        if (outstandingBalance) {
 
-                runningBalance =
-                    apiBalance;
-
-            }
-
-        } else {
-
-            runningBalance =
-                purchases - payments;
-
+            outstandingBalance.textContent =
+                formatCurrency(
+                    outstanding
+                );
         }
 
 
         // ==================================
-        // UPDATE SUMMARY
+        // RENDER TRANSACTIONS
         // ==================================
 
-        totalPurchases.textContent =
-            formatCurrency(purchases);
-
-        totalPaid.textContent =
-            formatCurrency(payments);
-
-        outstandingBalance.textContent =
-            formatCurrency(runningBalance);
-
-
-        // ==================================
-        // RENDER LEDGER
-        // ==================================
-
-        renderLedger(ledger);
-
+        renderLedger(
+            transactions
+        );
 
     } catch (error) {
 
@@ -371,21 +375,27 @@ async function loadLedger() {
         );
 
 
-        ledgerTableBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="6"
-                    class="empty-table">
+        if (ledgerTableBody) {
 
-                    Unable to load vendor ledger.
+            ledgerTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-table">
 
-                </td>
-            </tr>
-        `;
+                        Unable to load vendor ledger.
+
+                    </td>
+                </tr>
+            `;
+        }
 
 
-        transactionCount.textContent =
-            "Unable to load transactions";
+        if (transactionCount) {
+
+            transactionCount.textContent =
+                "Unable to load transactions";
+        }
 
 
         showMessage(
@@ -403,210 +413,272 @@ async function loadLedger() {
 
 function renderLedger(entries) {
 
-    if (!entries || !entries.length) {
+    if (
+        !entries ||
+        !entries.length
+    ) {
 
-        ledgerTableBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="6"
-                    class="empty-table">
+        if (ledgerTableBody) {
 
-                    <div class="empty-state">
+            ledgerTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-table">
 
-                        <div class="empty-icon">
-                            📒
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                📒
+                            </div>
+
+                            <strong>
+                                No transactions yet
+                            </strong>
+
+                            <span>
+                                Vendor purchases and payments
+                                will appear here.
+                            </span>
+
                         </div>
 
-                        <strong>
-                            No transactions yet
-                        </strong>
-
-                        <span>
-                            Vendor purchases and payments will appear here.
-                        </span>
-
-                    </div>
-
-                </td>
-            </tr>
-        `;
+                    </td>
+                </tr>
+            `;
+        }
 
 
-        transactionCount.textContent =
-            "0 transactions";
+        if (transactionCount) {
+
+            transactionCount.textContent =
+                "0 transactions";
+        }
+
 
         return;
     }
 
 
-    transactionCount.textContent =
-        `${entries.length} transaction${
-            entries.length === 1
-                ? ""
-                : "s"
-        }`;
+    // ==========================================
+    // TRANSACTION COUNT
+    // ==========================================
+
+    if (transactionCount) {
+
+        transactionCount.textContent =
+            `${entries.length} transaction${
+                entries.length === 1
+                    ? ""
+                    : "s"
+            }`;
+    }
 
 
-    let calculatedBalance = 0;
+    // ==========================================
+    // RENDER ROWS
+    // ==========================================
+
+    if (ledgerTableBody) {
+
+        ledgerTableBody.innerHTML =
+            entries.map(function (entry) {
+
+                // ==================================
+                // BACKEND DIRECTLY PROVIDES
+                // debit / credit / balance
+                // ==================================
+
+                const debit =
+                    Number(
+                        entry.debit || 0
+                    );
 
 
-    ledgerTableBody.innerHTML =
-        entries.map(function (entry) {
-
-            const amount =
-                Number(
-                    entry.amount ||
-                    entry.total_amount ||
-                    entry.purchase_amount ||
-                    entry.payment_amount ||
-                    0
-                );
+                const credit =
+                    Number(
+                        entry.credit || 0
+                    );
 
 
-            const type =
-                String(
-                    entry.type ||
-                    entry.transaction_type ||
-                    entry.entry_type ||
-                    ""
-                ).toLowerCase();
+                const balance =
+                    Number(
+                        entry.balance || 0
+                    );
 
 
-            const isPayment =
-                type.includes("payment") ||
-                type.includes("credit");
+                // ==================================
+                // TRANSACTION TYPE
+                // ==================================
+
+                const transactionType =
+                    String(
+                        entry.transaction_type ||
+                        entry.type ||
+                        entry.entry_type ||
+                        ""
+                    ).toUpperCase();
 
 
-            const isPurchase =
-                type.includes("purchase") ||
-                type.includes("debit") ||
-                type.includes("stock");
+                const isPayment =
+                    transactionType === "PAYMENT" ||
+                    transactionType.includes(
+                        "PAYMENT"
+                    ) ||
+                    credit > 0;
 
 
-            if (isPayment) {
-
-                calculatedBalance -= amount;
-
-            } else if (isPurchase) {
-
-                calculatedBalance += amount;
-
-            }
-
-
-            const date =
-                entry.created_at ||
-                entry.date ||
-                entry.transaction_date;
+                const isPurchase =
+                    transactionType === "PURCHASE" ||
+                    transactionType.includes(
+                        "PURCHASE"
+                    ) ||
+                    transactionType === "STOCK" ||
+                    transactionType.includes(
+                        "STOCK"
+                    ) ||
+                    debit > 0;
 
 
-            const description =
-                entry.description ||
-                entry.details ||
-                entry.note ||
-                (isPayment
-                    ? "Payment to vendor"
-                    : "Medicine purchase");
+                // ==================================
+                // DATE
+                // ==================================
+
+                const date =
+                    entry.created_at ||
+                    entry.date ||
+                    entry.transaction_date;
 
 
-            const debit =
-                isPurchase
-                    ? amount
-                    : 0;
+                // ==================================
+                // DESCRIPTION
+                // ==================================
+
+                const description =
+                    entry.description ||
+                    (
+                        isPayment
+                            ? "Payment to vendor"
+                            : "Medicine purchase"
+                    );
 
 
-            const credit =
-                isPayment
-                    ? amount
-                    : 0;
+                // ==================================
+                // DISPLAY TYPE
+                // ==================================
+
+                let displayType =
+                    "Transaction";
 
 
-            const balance =
-                entry.balance !== undefined
-                    ? Number(entry.balance)
-                    : calculatedBalance;
+                let badgeClass =
+                    "warning";
 
 
-            return `
-                <tr>
+                if (isPayment) {
 
-                    <!-- DATE -->
+                    displayType =
+                        "Payment";
 
-                    <td>
-                        ${formatDate(date)}
-                    </td>
+                    badgeClass =
+                        "success";
+
+                } else if (isPurchase) {
+
+                    displayType =
+                        "Purchase";
+
+                    badgeClass =
+                        "warning";
+                }
 
 
-                    <!-- TYPE -->
+                // ==================================
+                // RETURN TABLE ROW
+                // ==================================
 
-                    <td>
+                return `
+                    <tr>
 
-                        <span class="status-badge ${
-                            isPayment
-                                ? "success"
-                                : "warning"
-                        }">
+                        <!-- DATE -->
+
+                        <td>
+                            ${formatDate(
+                                date
+                            )}
+                        </td>
+
+
+                        <!-- TYPE -->
+
+                        <td>
+
+                            <span
+                                class="status-badge ${badgeClass}">
+
+                                ${displayType}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <td>
+                            ${escapeHTML(
+                                description
+                            )}
+                        </td>
+
+
+                        <!-- DEBIT -->
+
+                        <td>
 
                             ${
-                                isPayment
-                                    ? "Payment"
-                                    : "Purchase"
+                                debit > 0
+                                    ? formatCurrency(
+                                        debit
+                                    )
+                                    : "-"
                             }
 
-                        </span>
-
-                    </td>
+                        </td>
 
 
-                    <!-- DESCRIPTION -->
+                        <!-- CREDIT -->
 
-                    <td>
-                        ${escapeHTML(
-                            description
-                        )}
-                    </td>
+                        <td>
 
+                            ${
+                                credit > 0
+                                    ? formatCurrency(
+                                        credit
+                                    )
+                                    : "-"
+                            }
 
-                    <!-- DEBIT -->
-
-                    <td>
-
-                        ${
-                            debit > 0
-                                ? formatCurrency(debit)
-                                : "-"
-                        }
-
-                    </td>
+                        </td>
 
 
-                    <!-- CREDIT -->
+                        <!-- BALANCE -->
 
-                    <td>
+                        <td>
 
-                        ${
-                            credit > 0
-                                ? formatCurrency(credit)
-                                : "-"
-                        }
+                            <strong>
+                                ${formatCurrency(
+                                    balance
+                                )}
+                            </strong>
 
-                    </td>
+                        </td>
 
+                    </tr>
+                `;
 
-                    <!-- BALANCE -->
-
-                    <td>
-
-                        <strong>
-                            ${formatCurrency(balance)}
-                        </strong>
-
-                    </td>
-
-                </tr>
-            `;
-
-        }).join("");
+            }).join("");
+    }
 }
 
 
@@ -621,11 +693,25 @@ function openPaymentModal() {
     }
 
 
-    paymentForm.reset();
+    if (!paymentModal) {
+        return;
+    }
 
-    paymentModal.classList.add("show");
 
-    paymentAmount.focus();
+    if (paymentForm) {
+        paymentForm.reset();
+    }
+
+
+    paymentModal.classList.add(
+        "show"
+    );
+
+
+    if (paymentAmount) {
+
+        paymentAmount.focus();
+    }
 }
 
 
@@ -635,19 +721,35 @@ function openPaymentModal() {
 
 function closePaymentModal() {
 
-    paymentModal.classList.remove("show");
+    if (!paymentModal) {
+        return;
+    }
 
-    paymentForm.reset();
+
+    paymentModal.classList.remove(
+        "show"
+    );
+
+
+    if (paymentForm) {
+
+        paymentForm.reset();
+    }
 }
 
 
 // ==========================================
-// ADD PAYMENT
+// ADD VENDOR PAYMENT
 // ==========================================
 
 async function savePayment(event) {
 
     event.preventDefault();
+
+
+    if (!validateVendorId()) {
+        return;
+    }
 
 
     const amount =
@@ -657,10 +759,19 @@ async function savePayment(event) {
 
 
     const description =
-        paymentDescription.value.trim();
+        paymentDescription
+            ? paymentDescription.value.trim()
+            : "";
 
 
-    if (!amount || amount <= 0) {
+    // ==========================================
+    // VALIDATION
+    // ==========================================
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
 
         showMessage(
             "Payment amount must be greater than 0.",
@@ -681,10 +792,14 @@ async function savePayment(event) {
     };
 
 
-    savePaymentBtn.disabled = true;
+    if (savePaymentBtn) {
 
-    savePaymentBtn.textContent =
-        "Saving...";
+        savePaymentBtn.disabled =
+            true;
+
+        savePaymentBtn.textContent =
+            "Saving...";
+    }
 
 
     try {
@@ -706,6 +821,10 @@ async function savePayment(event) {
         closePaymentModal();
 
 
+        // ==================================
+        // RELOAD LEDGER
+        // ==================================
+
         await loadLedger();
 
 
@@ -726,10 +845,14 @@ async function savePayment(event) {
 
     } finally {
 
-        savePaymentBtn.disabled = false;
+        if (savePaymentBtn) {
 
-        savePaymentBtn.textContent =
-            "Save Payment";
+            savePaymentBtn.disabled =
+                false;
+
+            savePaymentBtn.textContent =
+                "Save Payment";
+        }
     }
 }
 
@@ -761,6 +884,7 @@ function showMessage(
 
     ledgerMessage.textContent =
         message;
+
 
     ledgerMessage.className =
         `auth-message ${type}`;
@@ -811,7 +935,12 @@ function formatDate(dateValue) {
         new Date(dateValue);
 
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
         return "-";
     }
 
@@ -894,9 +1023,7 @@ if (paymentModal) {
             ) {
 
                 closePaymentModal();
-
             }
-
         }
     );
 }
@@ -952,7 +1079,6 @@ if (
             sidebarOverlay.classList.add(
                 "show"
             );
-
         }
     );
 
@@ -968,10 +1094,8 @@ if (
             sidebarOverlay.classList.remove(
                 "show"
             );
-
         }
     );
-
 }
 
 
